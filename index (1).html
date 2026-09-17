@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bocoum Service.Transfer</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Arial, Helvetica, sans-serif;
+      background:
+        radial-gradient(circle at 20% 20%, rgba(120, 70, 255, .28), transparent 35%),
+        radial-gradient(circle at 85% 80%, rgba(0, 210, 180, .12), transparent 30%),
+        #090817;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .container { width: min(480px, 100%); }
+    .brand {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+    .brand h1 {
+      margin: 0;
+      font-size: 29px;
+      letter-spacing: -.7px;
+    }
+    .brand p {
+      margin: 8px 0 0;
+      color: #aaa6bd;
+      font-size: 14px;
+    }
+    .card {
+      background: rgba(22, 19, 40, .88);
+      border: 1px solid rgba(255,255,255,.09);
+      border-radius: 24px;
+      padding: 26px;
+      box-shadow: 0 24px 70px rgba(0,0,0,.38);
+      backdrop-filter: blur(12px);
+    }
+    .label {
+      display: block;
+      margin: 0 0 9px;
+      color: #bdb8cf;
+      font-size: 14px;
+    }
+    .input-wrap {
+      display: flex;
+      align-items: center;
+      background: #0d0b18;
+      border: 1px solid #373149;
+      border-radius: 15px;
+      padding: 0 16px;
+      transition: .2s;
+    }
+    .input-wrap:focus-within {
+      border-color: #8d63ff;
+      box-shadow: 0 0 0 3px rgba(141,99,255,.12);
+    }
+    input {
+      width: 100%;
+      border: 0;
+      outline: 0;
+      background: transparent;
+      color: white;
+      padding: 17px 8px 17px 0;
+      font-size: 22px;
+      font-weight: 700;
+    }
+    .currency {
+      font-weight: 800;
+      color: #bda8ff;
+      font-size: 16px;
+    }
+    .arrow {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      margin: 17px auto;
+      background: #29213f;
+      color: #bda8ff;
+      font-size: 20px;
+    }
+    .receive input { color: #aef3df; }
+    .receive .currency { color: #6ee7c6; }
+    .button {
+      width: 100%;
+      margin-top: 24px;
+      border: 0;
+      border-radius: 15px;
+      padding: 17px;
+      font-size: 16px;
+      font-weight: 800;
+      cursor: pointer;
+      background: #25d366;
+      color: #071b0d;
+      transition: transform .15s, filter .15s;
+    }
+    .button:hover { filter: brightness(1.06); transform: translateY(-1px); }
+    .button:active { transform: translateY(0); }
+    .note {
+      text-align: center;
+      margin: 17px 0 0;
+      color: #8f899f;
+      font-size: 12px;
+      line-height: 1.5;
+    }
+    .error {
+      color: #ff8e9d;
+      font-size: 12px;
+      margin-top: 7px;
+      display: none;
+    }
+    footer {
+      text-align: center;
+      margin-top: 18px;
+      color: #716b80;
+      font-size: 11px;
+    }
+  </style>
+</head>
+<body>
+  <main class="container">
+    <div class="brand">
+      <h1>Bocoum Service.Transfer</h1>
+      <p>Transfert d'argent simple et rapide</p>
+    </div>
+
+    <section class="card">
+      <label class="label" for="xof">Montant à envoyer</label>
+      <div class="input-wrap">
+        <input id="xof" type="text" inputmode="numeric" placeholder="0" autocomplete="off">
+        <span class="currency">XOF</span>
+      </div>
+      <div id="error" class="error">Veuillez entrer un montant valide.</div>
+
+      <div class="arrow">↓</div>
+
+      <label class="label" for="inr">Montant à recevoir</label>
+      <div class="input-wrap receive">
+        <input id="inr" type="text" readonly placeholder="0">
+        <span class="currency">INR</span>
+      </div>
+
+      <button class="button" id="whatsapp">DEMANDER VIA WHATSAPP</button>
+
+      <p class="note">
+        Entrez le montant en XOF pour voir automatiquement le montant correspondant en INR.
+      </p>
+      <p class="note" style="color:#ffb84d; font-weight:700;">
+        ⚠️ Les frais Orange Money sont à la charge du client et ne sont pas inclus dans le montant ci-dessus.
+      </p>
+    </section>
+
+    <footer>© 2026 Bocoum Service.Transfer</footer>
+  </main>
+
+<script>
+  // Numéro WhatsApp à remplacer avant la mise en ligne.
+  const WHATSAPP_NUMBER = "22376404846";
+
+  const xofInput = document.getElementById("xof");
+  const inrInput = document.getElementById("inr");
+  const error = document.getElementById("error");
+
+  function cleanNumber(value) {
+    return value.replace(/[^\d]/g, "");
+  }
+
+  function formatXOF(value) {
+    if (!value) return "";
+    return Number(value).toLocaleString("fr-FR");
+  }
+
+  function calculate() {
+    const raw = cleanNumber(xofInput.value);
+
+    if (!raw) {
+      inrInput.value = "";
+      error.style.display = "none";
+      return;
+    }
+
+    const xof = Number(raw);
+
+    if (!Number.isFinite(xof) || xof <= 0) {
+      inrInput.value = "";
+      error.style.display = "block";
+      return;
+    }
+
+    error.style.display = "none";
+    xofInput.value = formatXOF(raw);
+
+    // Taux interne : 1 INR = 6 XOF
+    const inr = xof / 6;
+
+    inrInput.value = inr.toLocaleString("fr-FR", {
+      minimumFractionDigits: inr % 1 === 0 ? 0 : 2,
+      maximumFractionDigits: 2
+    });
+  }
+
+  xofInput.addEventListener("input", calculate);
+
+  document.getElementById("whatsapp").addEventListener("click", () => {
+    const raw = cleanNumber(xofInput.value);
+    const xof = Number(raw);
+
+    if (!raw || !Number.isFinite(xof) || xof <= 0) {
+      error.style.display = "block";
+      xofInput.focus();
+      return;
+    }
+
+    const inr = xof / 6;
+
+    const xofFormatted = xof.toLocaleString("fr-FR");
+    const inrFormatted = inr.toLocaleString("fr-FR", {
+      minimumFractionDigits: inr % 1 === 0 ? 0 : 2,
+      maximumFractionDigits: 2
+    });
+
+    const message =
+      "Bonjour, je souhaite effectuer un transfert.%0A%0A" +
+      "Montant à envoyer : " + encodeURIComponent(xofFormatted + " XOF") + "%0A" +
+      "Montant à recevoir : " + encodeURIComponent(inrFormatted + " INR") + "%0A%0A" +
+      encodeURIComponent("(Frais Orange Money non inclus, à ma charge)");
+
+    window.open("https://wa.me/" + WHATSAPP_NUMBER + "?text=" + message, "_blank");
+  });
+</script>
+</body>
+</html>
