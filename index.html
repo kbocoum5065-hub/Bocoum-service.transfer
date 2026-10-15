@@ -200,7 +200,7 @@
     xofInput.value = formatXOF(raw);
 
     // Taux interne : 1 INR = 6 XOF
-    const inr = xof / 6;
+    const inr = xof / 6.2;
 
     inrInput.value = inr.toLocaleString("fr-FR", {
       minimumFractionDigits: inr % 1 === 0 ? 0 : 2,
